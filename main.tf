@@ -147,3 +147,65 @@ resource "aws_instance" "web_server" {
     Name = "terraform-web-server"
   }
 }
+resource "aws_instance" "web_server_2" {
+  ami                    = "ami-056c52660e81ad383"
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public_subnet_2.id
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  key_name               = "terraform-key"
+
+  user_data = <<-EOF
+              #!/bin/bash
+              dnf update -y
+              dnf install -y httpd
+              systemctl enable httpd
+              systemctl start httpd
+              echo "<h1>Web Server 2</h1>" > /var/www/html/index.html
+              EOF
+
+  tags = {
+    Name = "terraform-web-server-2"
+  }
+}
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name = "rds-subnet-group"
+
+  subnet_ids = [
+    aws_subnet.private_subnet_1.id,
+    aws_subnet.private_subnet_2.id
+  ]
+
+  tags = {
+    Name = "rds-subnet-group"
+  }
+}
+resource "aws_db_instance" "mysql" {
+
+  identifier = "terraform-mysql"
+
+  allocated_storage = 20
+
+  engine = "mysql"
+
+  engine_version = "8.0"
+
+  instance_class = "db.t3.micro"
+
+  username = "admin"
+
+  password = "Password123!"
+
+  db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
+
+  vpc_security_group_ids = [
+    aws_security_group.db_sg.id
+  ]
+
+  publicly_accessible = false
+
+  skip_final_snapshot = true
+
+  tags = {
+    Name = "terraform-rds"
+  }
+}
