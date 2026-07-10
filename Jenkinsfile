@@ -34,5 +34,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Approval') {
+            steps {
+                input 'Approve Terraform Apply?'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    bat 'terraform apply -auto-approve'
+                }
+            }
+        }
     }
 }
