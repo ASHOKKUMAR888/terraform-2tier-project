@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/ASHOKKUMAR888/terraform-2tier-project.git'
-            }
-        }
-
         stage('Terraform Init') {
             steps {
                 bat 'terraform init'
