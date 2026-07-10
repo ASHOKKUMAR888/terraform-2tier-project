@@ -1,11 +1,20 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_DEFAULT_REGION = 'eu-north-1'
+    }
+
     stages {
 
         stage('Terraform Init') {
             steps {
-                bat 'terraform init'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    bat 'terraform init'
+                }
             }
         }
 
@@ -17,7 +26,12 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                bat 'terraform plan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+                    bat 'terraform plan'
+                }
             }
         }
     }
